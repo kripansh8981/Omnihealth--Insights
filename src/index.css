@@ -1,13 +1,210 @@
-body {
+/* Reset + Base */
+* {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to right, #eef2f7, #f9fbfd);
+  color: #333;
+  min-height: 100vh;
+  line-height: 1.6;
 }
+
+
+/* Navbar */
+.navbar {
+  background-color: #0c3c78;
+  color: white;
+  padding: 15px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.navbar-logo {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+  margin: 0;
+}
+
+.navbar-links li a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.navbar-links li a:hover {
+  text-decoration: underline;
+  color: #a8d8ff;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Footer */
+.footer {
+  background-color: #0c3c78;
+  color: #ffffff;
+  padding: 20px 30px;
+  margin-top: 40px;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.footer-text {
+  font-size: 14px;
+}
+
+.footer-links a {
+  color: #ffffff;
+  margin-left: 20px;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+/* Hero Section */
+.hero-section {
+  text-align: center;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #0c3c78 0%, #1570bf 100%);
+  color: white;
+  border-radius: 10px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.hero-section h2 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.hero-section p {
+  font-size: 18px;
+  opacity: 0.95;
+}
+
+/* Features */
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.feature-card {
+  flex: 1 1 280px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 25px 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  text-align: center;
+}
+
+.feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card h3 {
+  color: #0c3c78;
+  margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.feature-card p {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .navbar-links {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .hero-section h2 {
+    font-size: 28px;
+  }
+
+  .feature-card {
+    flex: 1 1 100%;
+  }
+}
+
+  /* Emergency Feature Card */
+.emergency-card {
+  flex: 1 1 280px;
+  background-color: #ff4d4d; /* Red color for emergency */
+  border-radius: 12px;
+  padding: 25px 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  text-align: center;
+  animation: shake 0.6s ease-in-out infinite alternate; /* Add a shake animation */
+}
+
+.emergency-card h3 {
+  color: #fff;
+  margin-bottom: 10px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.emergency-card p {
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Shake Animation */
+@keyframes shake {
+  0% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  100% {
+    transform: translateX(-5px);
+  }
+}
+
+  
+  
+  
+  
