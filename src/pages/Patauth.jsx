@@ -12,7 +12,7 @@ const PatientAuth = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/patients/login", {
+      const res = await fetch("http://localhost:5000/api/auth/patient/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -21,21 +21,19 @@ const PatientAuth = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Login failed");
+        setError(data.error || "Login failed");
         return;
       }
 
       localStorage.setItem("token", data.token);
-      localStorage.setItem("patient", JSON.stringify(data.patient));
-
       navigate("/patient/dashboard");
     } catch (err) {
-      setError("Something went wrong. Try again.");
+      setError("Something went wrong. Please try again.");
     }
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", marginTop: "50px" }}>
+    <div style={{ display: "flex", justifyContent: "center", padding: "40px" }}>
       <form
         onSubmit={handleLogin}
         style={{
@@ -46,33 +44,55 @@ const PatientAuth = () => {
           boxShadow: "0 0 12px rgba(0,0,0,0.1)",
         }}
       >
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Patient Login</h2>
-        {error && <p style={{ color: "red", marginBottom: "10px" }}>{error}</p>}
+        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
+          Patient Login
+        </h2>
+
+        {error && (
+          <p style={{ color: "red", textAlign: "center", marginBottom: "10px" }}>
+            {error}
+          </p>
+        )}
+
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          style={{ width: "100%", padding: "10px", marginBottom: "15px" }}
+          style={{
+            width: "100%",
+            padding: "10px",
+            marginBottom: "15px",
+            borderRadius: "5px",
+            border: "1px solid #ccc",
+          }}
         />
+
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          style={{ width: "100%", padding: "10px", marginBottom: "15px" }}
+          style={{
+            width: "100%",
+            padding: "10px",
+            marginBottom: "15px",
+            borderRadius: "5px",
+            border: "1px solid #ccc",
+          }}
         />
+
         <button
           type="submit"
           style={{
             width: "100%",
             padding: "10px",
-            background: "#28a745",
-            color: "#fff",
             border: "none",
             borderRadius: "5px",
+            background: "#007bff",
+            color: "#fff",
             fontWeight: "600",
           }}
         >

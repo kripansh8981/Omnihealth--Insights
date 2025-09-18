@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './HospitalCard.css'; // Assuming you’ve got styles for the card
+// import './HospitalCard.css'; // Assuming you’ve got styles for the card
 
 const HospitalCard = ({ hospital }) => {
   const navigate = useNavigate();

@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
+// Import your models
 const Doctor = require("../models/Doctor");
 const Patient = require("../models/Patient");
 const Hospital = require("../models/Hospitals");

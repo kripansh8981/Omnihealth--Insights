@@ -1,129 +1,35 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import hospitalImage from "./image.jpg";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Home = () => {
   return (
-    <div
-      style={{
-        backgroundImage: `url(${hospitalImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "40px 20px",
-        overflowX: "hidden",
-        position: "relative",
-        color: "#fff",
-      }}
-    >
-      {/* Overlay for dark background effect */}
-      <div
-        style={{
-          backgroundColor: "rgba(0, 0, 0, 0.65)",
-          padding: "60px 40px",
-          borderRadius: "12px",
-          maxWidth: "1200px",
-          width: "100%",
-          boxShadow: "0 0 30px rgba(0,0,0,0.7)",
-          textAlign: "center",
-        }}
-      >
-        {/* Main Title */}
-        <h1 style={{ fontSize: "3rem", marginBottom: "12px" }}>Welcome to OmniHealth Insights</h1>
-        {/* Subtitle */}
-        <p style={{ fontSize: "1.3rem", marginBottom: "40px", opacity: 0.85 }}>
-          A next-gen hospital management solution for OPD, beds, admissions & inventory.
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-900 text-white">
+      {/* Background overlay with subtle gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900 to-gray-800 opacity-90 z-0"></div>
+
+      {/* Main content container */}
+      <div className="relative z-10 text-center p-8 md:p-12 bg-white bg-opacity-10 rounded-3xl shadow-2xl max-w-2xl backdrop-blur-sm transform transition-all duration-300 hover:scale-105">
+        <h1 className="text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-md">
+          Welcome to OmniHealth Insights
+        </h1>
+        <p className="text-lg md:text-xl font-light mb-8 opacity-90 leading-relaxed">
+          Your modern and efficient solution for comprehensive hospital management.
+          Streamline patient care, manage appointments, and optimize resource availability with our integrated platform.
         </p>
-        {/* Login Options as Buttons */}
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: "20px",
-          }}
+
+        {/* Call-to-Action button */}
+        <Link
+          to="/auth"
+          className="inline-block py-3 px-8 text-lg font-bold rounded-full bg-blue-600 text-white shadow-lg transition-all duration-300 hover:bg-blue-700 hover:scale-105 transform-gpu"
         >
-          {/* Doctor Login */}
-          <Link
-            to="/doctor/auth"
-            style={{
-              padding: "14px 20px",
-              width: "180px",
-              backgroundColor: "#007bff",
-              color: "white",
-              borderRadius: "8px",
-              fontSize: "1.1rem",
-              fontWeight: "600",
-              textAlign: "center",
-              textDecoration: "none",
-              boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-              transition: "background-color 0.3s, transform 0.2s",
-            }}
-            onMouseEnter={(e) => (e.target.style.backgroundColor = "#0056b3")}
-            onMouseLeave={(e) => (e.target.style.backgroundColor = "#007bff")}
-          >
-            Doctor Login
-          </Link>
-
-          {/* Patient Login */}
-          <Link
-            to="/patient/auth"
-            style={{
-              padding: "14px 20px",
-              width: "180px",
-              backgroundColor: "#28a745",
-              color: "white",
-              borderRadius: "8px",
-              fontSize: "1.1rem",
-              fontWeight: "600",
-              textAlign: "center",
-              textDecoration: "none",
-              boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-            }}
-            onMouseEnter={(e) => (e.target.style.backgroundColor = "#1e7e34")}
-            onMouseLeave={(e) => (e.target.style.backgroundColor = "#28a745")}
-          >
-            Patient Login
-          </Link>
-
-          {/* Hospital Login */}
-          <Link
-            to="/hospital/auth"
-            style={{
-              padding: "14px 20px",
-              width: "180px",
-              backgroundColor: "#17a2b8",
-              color: "white",
-              borderRadius: "8px",
-              fontSize: "1.1rem",
-              fontWeight: "600",
-              textAlign: "center",
-              textDecoration: "none",
-              boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
-            }}
-            onMouseEnter={(e) => (e.target.style.backgroundColor = "#117a8b")}
-            onMouseLeave={(e) => (e.target.style.backgroundColor = "#17a2b8")}
-          >
-            Hospital Login
-          </Link>
-        </div>
+          Get Started
+        </Link>
       </div>
     </div>
   );
 };
 
 export default Home;
-
-
-
-
-
-
 
 
 

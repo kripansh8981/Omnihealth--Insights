@@ -12,7 +12,7 @@ const HospitalAuth = () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/hospitals/login", {
+      const res = await fetch("http://localhost:5000/api/auth/hospital/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -21,16 +21,14 @@ const HospitalAuth = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.message || "Login failed");
+        setError(data.error || "Login failed");
         return;
       }
 
       localStorage.setItem("token", data.token);
-      localStorage.setItem("hospital", JSON.stringify(data.hospital));
-
       navigate("/hospital/dashboard");
     } catch (err) {
-      setError("Something went wrong. Try again.");
+      setError("Something went wrong. Please try again.");
     }
   };
 
@@ -49,7 +47,13 @@ const HospitalAuth = () => {
         <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
           Hospital Login
         </h2>
-        {error && <p style={{ color: "red", marginBottom: "10px" }}>{error}</p>}
+
+        {error && (
+          <p style={{ color: "red", textAlign: "center", marginBottom: "10px" }}>
+            {error}
+          </p>
+        )}
+
         <input
           type="email"
           placeholder="Email"
@@ -64,6 +68,7 @@ const HospitalAuth = () => {
             border: "1px solid #ccc",
           }}
         />
+
         <input
           type="password"
           placeholder="Password"
@@ -78,6 +83,7 @@ const HospitalAuth = () => {
             border: "1px solid #ccc",
           }}
         />
+
         <button
           type="submit"
           style={{
@@ -98,4 +104,3 @@ const HospitalAuth = () => {
 };
 
 export default HospitalAuth;
-

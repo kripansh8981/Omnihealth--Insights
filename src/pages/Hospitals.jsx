@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import "./Hospitals.css"; // Ensure this CSS file exists
+//import "./Hospitals.css"; // Ensure this CSS file exists
 
 // Dummy data of hospitals (replace with your actual data source)
 const hospitals = [
