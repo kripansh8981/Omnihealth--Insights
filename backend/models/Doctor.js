@@ -1,21 +1,28 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const doctorSchema = new mongoose.Schema({
-  name: String,
-  specialization: String,
-  availability: [
-    {
-      date: String,  // Date for availability (e.g., "2025-04-17")
-      slots: [
-        {
-          startTime: String,  // "9:00 AM"
-          endTime: String,    // "9:15 AM"
-          available: { type: Boolean, default: true },
-        },
-      ],
-    },
-  ],
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  specialization: { type: String },
+  role: { type: String, default: "doctor" }
+}, { timestamps: true });
+
+// Hash password before saving
+doctorSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+   this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
-const Doctor = mongoose.model('Doctor', doctorSchema);
-module.exports = Doctor;
+doctorSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+module.exports = mongoose.model('Doctor', doctorSchema);

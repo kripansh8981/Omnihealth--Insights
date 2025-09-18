@@ -10,6 +10,7 @@ const appointmentSchema = new mongoose.Schema({
   slot: { type: String, required: true }, // The 15-minute time slot
   token: { type: Number, required: true },
   slotTime: { type: String, required: true }, // Add this field
+  email: { type: String, required: true }, // Add email field
 });
 
 const Appointment = mongoose.model('Appointment', appointmentSchema);

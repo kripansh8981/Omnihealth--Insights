@@ -1,16 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const Appointment = require('../models/appointment');
+const transporter = require('../utils/mailer'); // Adjusted path
+// Import the mailer
 
 // @route   POST /api/appointment
-// @desc    Book an appointment with Smart Auto-Scheduling
+// @desc    Book an appointment with Smart Auto-Scheduling and send confirmation email
 // @access  Public
 router.post('/', async (req, res) => {
   try {
-    const { hospitalName, doctorName, patientName, age, gender, appointmentDate } = req.body;
+    const { hospitalName, doctorName, patientName, age, gender, appointmentDate, email } = req.body;
 
     // Check if all required fields are present
-    if (!hospitalName || !doctorName || !patientName || !appointmentDate) {
+    if (!hospitalName || !doctorName || !patientName || !appointmentDate || !email) {
       return res.status(400).json({ message: 'Missing required fields.' });
     }
 
@@ -71,10 +73,40 @@ router.post('/', async (req, res) => {
       slot: availableSlot, // Set the available slot
       slotTime: availableSlot, // Set the slot time for the receipt
       token,
+      email, // Save the email
     });
 
     // Save the new appointment in the database
     await newAppointment.save();
+
+    // Send confirmation email to the user
+    const mailOptions = {
+      from: process.env.EMAIL_USER, // Sender email (configured in mailer.js)
+      to: email, // Receiver email
+      subject: 'Appointment Confirmation',
+      text: `
+        Your appointment has been successfully booked!
+
+        Hospital: ${hospitalName}
+        Doctor: ${doctorName}
+        Patient: ${patientName}
+        Age: ${age}
+        Gender: ${gender}
+        Appointment Date: ${appointmentDate}
+        Slot: ${availableSlot}
+        Token: ${token}
+
+        Thank you for choosing our services. We look forward to seeing you!
+      `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+        return res.status(500).json({ message: 'Failed to send email', error: error.message });
+      }
+      console.log('Email sent: ' + info.response);
+    });
 
     // Return the success message and the new appointment details
     res.status(201).json({
@@ -110,7 +142,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch appointments', error: err.message });
   }
 });
-// In routes/appointments.js
 
 // @route   DELETE /api/appointment/:id
 // @desc    Cancel an appointment
@@ -129,7 +160,6 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ message: 'Failed to cancel appointment', error: err.message });
   }
 });
-
 
 module.exports = router;
 

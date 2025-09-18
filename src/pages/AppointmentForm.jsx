@@ -12,6 +12,7 @@ const AppointmentForm = () => {
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
   const [selectedDoctor, setSelectedDoctor] = useState('');
+  const [email, setEmail] = useState('');
   const [confirmation, setConfirmation] = useState(null);
 
   useEffect(() => {
@@ -44,13 +45,14 @@ const AppointmentForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!patientName || !age || !gender || !selectedDoctor) {
+    if (!patientName || !age || !gender || !selectedDoctor || !email) {
       alert("Please fill in all fields.");
       return;
     }
 
     const slotTime = generateSlots()[Math.floor(Math.random() * generateSlots().length)];
     const today = new Date();
+    today.setDate(today.getDate()+1);
     const appointmentDate = today.toISOString().split('T')[0]; // YYYY-MM-DD format
 
     try {
@@ -60,6 +62,7 @@ const AppointmentForm = () => {
         patientName,
         age,
         gender,
+        email, // Send email to the backend
         slotTime, 
         appointmentDate
       });
@@ -125,6 +128,17 @@ const AppointmentForm = () => {
           </div>
 
           <div style={{ marginBottom: '20px' }}>
+            <label><strong>Email</strong></label><br />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}
+            />
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
             <label><strong>Select Doctor</strong></label><br />
             <select
               value={selectedDoctor}
@@ -174,6 +188,7 @@ const AppointmentForm = () => {
           <p><strong>Patient:</strong> {confirmation.patientName}</p>
           <p><strong>Age:</strong> {confirmation.age}</p>
           <p><strong>Gender:</strong> {confirmation.gender}</p>
+          <p><strong>Email:</strong> {confirmation.email}</p>
           <p><strong>Appointment Slot:</strong> {confirmation.slotTime}</p>
         </div>
       )}
@@ -182,6 +197,7 @@ const AppointmentForm = () => {
 };
 
 export default AppointmentForm;
+
 
 
 

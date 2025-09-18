@@ -20,7 +20,7 @@ const hospitals = [
     name: "AIIMS Kalyani",
     location: "Kalyani, Kolkata",
     specialization: "Neurosciences, Urology, Endocrinology, Obstetrics and Gynecology",
-    image: "https://aiimskalyani.edu.in/images/aiims-img.jpg",
+    image: "https://aiimskalyani.edu.in/images/gallery/1689843588_IMG-20230720-WA0009.jpg",
   },
   {
     name: "AMRI Hospital",

@@ -1,137 +1,123 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import hospitalImage from './image.jpg'; // Local image inside src/pages
+import hospitalImage from "./image.jpg";
 
 const Home = () => {
   return (
     <div
-      className="container"
       style={{
         backgroundImage: `url(${hospitalImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        padding: '20px',
-        width: '100%',
-        overflowX: 'hidden',
-        position: 'relative',
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "40px 20px",
+        overflowX: "hidden",
+        position: "relative",
+        color: "#fff",
       }}
     >
-      {/* Hero Section */}
+      {/* Overlay for dark background effect */}
       <div
-        className="hero-section"
         style={{
-          textAlign: 'center',
-          zIndex: 2,
-          padding: '80px 20px',
-          maxWidth: '1200px',
-          width: '100%',
-          background: 'rgba(0, 0, 0, 0.5)',
-          borderRadius: '10px',
-          marginBottom: '40px',
+          backgroundColor: "rgba(0, 0, 0, 0.65)",
+          padding: "60px 40px",
+          borderRadius: "12px",
+          maxWidth: "1200px",
+          width: "100%",
+          boxShadow: "0 0 30px rgba(0,0,0,0.7)",
+          textAlign: "center",
         }}
       >
-        <h2 style={{ fontSize: '3rem', marginBottom: '20px', color: '#ffffff' }}>
-          Welcome to OmniHealth Insights
-        </h2>
-        <p style={{ fontSize: '1.25rem', opacity: 0.9, color: '#ffffff' }}>
+        {/* Main Title */}
+        <h1 style={{ fontSize: "3rem", marginBottom: "12px" }}>Welcome to OmniHealth Insights</h1>
+        {/* Subtitle */}
+        <p style={{ fontSize: "1.3rem", marginBottom: "40px", opacity: 0.85 }}>
           A next-gen hospital management solution for OPD, beds, admissions & inventory.
         </p>
-      </div>
-
-      {/* Feature Cards */}
-      <div
-        className="section features"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '30px',
-          zIndex: 2,
-          maxWidth: '1200px',
-          width: '100%',
-          marginBottom: '40px',
-        }}
-      >
-        {/* OPD Queue Card (Redirecting to Hospitals with state from opdqueue) */}
-        <Link
-          to="/hospitals"
-          state={{ from: "opdqueue" }}
-          className="feature-card"
-          style={{ textDecoration: 'none', color: 'inherit' }}
-        >
-          <h3>OPD Queue</h3>
-          <p>Track live outpatient queues for better patient flow.</p>
-        </Link>
-
-        {/* Find Hospitals Card (Redirecting to Hospitals page) */}
-        <Link
-          to="/hospitals"
-          className="feature-card"
-          style={{ textDecoration: 'none', color: 'inherit' }}
-        >
-          <h3>Find Hospitals</h3>
-          <p>Search and explore hospitals across the city.</p>
-        </Link>
-
-        {/* City-wide Integration Card (Redirecting to Hospitals page) */}
-        <Link
-          to="/hospitals"
-          className="feature-card"
-          style={{ textDecoration: 'none', color: 'inherit' }}
-        >
-          <h3>City-wide Integration</h3>
-          <p>Connect with a larger health network seamlessly.</p>
-        </Link>
-
-        {/* Bed Availability Card (Redirecting to Bed Availability page) */}
-      {/* Bed Availability Card (Redirecting to Bed Availability page) */}
-<Link
-  to="/bed-availability"  // Corrected the path
-  className="feature-card"
-  style={{ textDecoration: 'none', color: 'inherit' }}
->
-  <h3>Bed Availability</h3>
-  <p>Monitor current bed status across departments.</p>
-</Link>
-
-
-        {/* Inventory Card (Redirecting to Inventory page) */}
-        <Link
-          to="/inventory"
-          className="feature-card"
-          style={{ textDecoration: 'none', color: 'inherit' }}
-        >
-          <h3>Inventory</h3>
-          <p>Stay stocked with real-time inventory management.</p>
-        </Link>
-
-        {/* Emergency Card (Redirecting to Emergency page) */}
-        <Link
-          to="/emergency"
-          className="feature-card emergency-card"
+        {/* Login Options as Buttons */}
+        <div
           style={{
-            backgroundColor: '#ff4444',
-            color: 'white',
-            textDecoration: 'none',
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: "20px",
           }}
         >
-          <h3>🚨 Emergency</h3>
-          <p>Quick response for emergency cases and immediate care.</p>
-        </Link>
+          {/* Doctor Login */}
+          <Link
+            to="/doctor/auth"
+            style={{
+              padding: "14px 20px",
+              width: "180px",
+              backgroundColor: "#007bff",
+              color: "white",
+              borderRadius: "8px",
+              fontSize: "1.1rem",
+              fontWeight: "600",
+              textAlign: "center",
+              textDecoration: "none",
+              boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+              transition: "background-color 0.3s, transform 0.2s",
+            }}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#0056b3")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#007bff")}
+          >
+            Doctor Login
+          </Link>
+
+          {/* Patient Login */}
+          <Link
+            to="/patient/auth"
+            style={{
+              padding: "14px 20px",
+              width: "180px",
+              backgroundColor: "#28a745",
+              color: "white",
+              borderRadius: "8px",
+              fontSize: "1.1rem",
+              fontWeight: "600",
+              textAlign: "center",
+              textDecoration: "none",
+              boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+            }}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#1e7e34")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#28a745")}
+          >
+            Patient Login
+          </Link>
+
+          {/* Hospital Login */}
+          <Link
+            to="/hospital/auth"
+            style={{
+              padding: "14px 20px",
+              width: "180px",
+              backgroundColor: "#17a2b8",
+              color: "white",
+              borderRadius: "8px",
+              fontSize: "1.1rem",
+              fontWeight: "600",
+              textAlign: "center",
+              textDecoration: "none",
+              boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+            }}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#117a8b")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#17a2b8")}
+          >
+            Hospital Login
+          </Link>
+        </div>
       </div>
     </div>
   );
 };
 
 export default Home;
-
-
-
 
 
 
