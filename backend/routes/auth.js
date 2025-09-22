@@ -3,7 +3,6 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
-// Import your models
 const Doctor = require("../models/Doctor");
 const Patient = require("../models/Patient");
 const Hospital = require("../models/Hospitals");
@@ -29,15 +28,15 @@ router.post("/doctor/signup", async (req, res) => {
     const exists = await Doctor.findOne({ email });
     if (exists) return res.status(400).json({ error: "Email already registered" });
 
-    // The password will be hashed by the Mongoose pre('save') middleware
+    // REMOVED: const hashedPassword = await bcrypt.hash(password, 10);
     const doctor = new Doctor({
       name,
       specialization,
       email,
-      password,
+      password, // Pass the plain password to the model
       role: "doctor"
     });
-    await doctor.save();
+    await doctor.save(); // Mongoose pre-save hook will hash the password here
 
     const token = generateToken(doctor._id, "doctor");
     res.status(201).json({
@@ -57,8 +56,7 @@ router.post("/doctor/login", async (req, res) => {
     const doctor = await Doctor.findOne({ email });
     if (!doctor) return res.status(404).json({ error: "Doctor not found" });
 
-    // The comparePassword method in the Doctor model handles the bcrypt comparison
-    const isMatch = await doctor.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, doctor.password);
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
     const token = generateToken(doctor._id, "doctor");
@@ -86,15 +84,15 @@ router.post("/patient/signup", async (req, res) => {
     const exists = await Patient.findOne({ email });
     if (exists) return res.status(400).json({ error: "Email already registered" });
 
-    // The password will be hashed by the Mongoose pre('save') middleware
+    // REMOVED: const hashedPassword = await bcrypt.hash(password, 10);
     const patient = new Patient({
       name,
       age,
       email,
-      password,
+      password, // Pass the plain password to the model
       role: "patient"
     });
-    await patient.save();
+    await patient.save(); // Mongoose pre-save hook will hash the password here
 
     const token = generateToken(patient._id, "patient");
     res.status(201).json({
@@ -142,15 +140,15 @@ router.post("/hospital/signup", async (req, res) => {
     const exists = await Hospital.findOne({ email });
     if (exists) return res.status(400).json({ error: "Email already registered" });
 
-    // The password will be hashed by the Mongoose pre('save') middleware
+    // REMOVED: const hashedPassword = await bcrypt.hash(password, 10);
     const hospital = new Hospital({
       name,
       address,
       email,
-      password,
+      password, // Pass the plain password to the model
       role: "hospital"
     });
-    await hospital.save();
+    await hospital.save(); // Mongoose pre-save hook will hash the password here
 
     const token = generateToken(hospital._id, "hospital");
     res.status(201).json({
