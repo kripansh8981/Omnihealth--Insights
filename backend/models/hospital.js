@@ -1,28 +1,38 @@
-// models/Hospital.js (Example)
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const doctorSchema = new mongoose.Schema({
-  name: String,
-  specialization: String,
-  availability: [String], // Array of available time slots
-});
-
-const bedAvailabilitySchema = new mongoose.Schema({
-  type: String,  // e.g., "ICU", "General"
-  availableBeds: Number,
-  totalBeds: Number,
+  name: { type: String, required: true },
+  specialization: { type: String, required: true },
 });
 
 const hospitalSchema = new mongoose.Schema({
-  name: String,
-  location: String,
-  specialization: [String], // Array of specializations offered
-  image: String,
-  doctors: [doctorSchema], // Array of doctors available in the hospital
-  bedAvailability: [bedAvailabilitySchema], // Bed availability details
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  address: { type: String, required: true },
+  role: { type: String, default: 'hospital' },
+  // Expanded fields for a more complete profile
+  phone: { type: String },
+  website: { type: String },
+  image: { type: String },
+  doctors: [doctorSchema], // Added a doctors array
+}, { timestamps: true });
+
+// Hash password before saving
+hospitalSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
-const Hospital = mongoose.model("Hospital", hospitalSchema);
+hospitalSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
-module.exports = Hospital;
-
+module.exports = mongoose.model('Hospital', hospitalSchema);

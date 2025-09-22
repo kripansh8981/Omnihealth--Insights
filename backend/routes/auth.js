@@ -28,15 +28,15 @@ router.post("/doctor/signup", async (req, res) => {
     const exists = await Doctor.findOne({ email });
     if (exists) return res.status(400).json({ error: "Email already registered" });
 
-    // REMOVED: const hashedPassword = await bcrypt.hash(password, 10);
+    // The model's pre-save hook will handle password hashing
     const doctor = new Doctor({
       name,
       specialization,
       email,
-      password, // Pass the plain password to the model
+      password,
       role: "doctor"
     });
-    await doctor.save(); // Mongoose pre-save hook will hash the password here
+    await doctor.save();
 
     const token = generateToken(doctor._id, "doctor");
     res.status(201).json({
@@ -84,15 +84,15 @@ router.post("/patient/signup", async (req, res) => {
     const exists = await Patient.findOne({ email });
     if (exists) return res.status(400).json({ error: "Email already registered" });
 
-    // REMOVED: const hashedPassword = await bcrypt.hash(password, 10);
+    // The model's pre-save hook will handle password hashing
     const patient = new Patient({
       name,
       age,
       email,
-      password, // Pass the plain password to the model
+      password,
       role: "patient"
     });
-    await patient.save(); // Mongoose pre-save hook will hash the password here
+    await patient.save();
 
     const token = generateToken(patient._id, "patient");
     res.status(201).json({
@@ -140,15 +140,15 @@ router.post("/hospital/signup", async (req, res) => {
     const exists = await Hospital.findOne({ email });
     if (exists) return res.status(400).json({ error: "Email already registered" });
 
-    // REMOVED: const hashedPassword = await bcrypt.hash(password, 10);
+    // The model's pre-save hook will handle password hashing
     const hospital = new Hospital({
       name,
       address,
       email,
-      password, // Pass the plain password to the model
+      password,
       role: "hospital"
     });
-    await hospital.save(); // Mongoose pre-save hook will hash the password here
+    await hospital.save();
 
     const token = generateToken(hospital._id, "hospital");
     res.status(201).json({
