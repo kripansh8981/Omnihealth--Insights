@@ -1,58 +1,81 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useHistory } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
-const HospitalSearch = () => {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const history = useHistory();
+const Hospitals = () => {
+  const [hospitals, setHospitals] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (query.trim()) {
-      try {
-        const response = await axios.get(`/api/hospitals/search?q=${query}`);
-        setResults(response.data); // Set search results
-      } catch (error) {
-        console.error('Error fetching search results:', error);
-      }
+  const fetchHospitals = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/hospitals");
+      setHospitals(response.data);
+    } catch (err) {
+      setError("Failed to fetch hospitals. Please ensure the backend server is running.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleHospitalClick = (id) => {
-    history.push(`/hospital/${id}`); // Redirect to hospital details page
-  };
+  useEffect(() => {
+    fetchHospitals();
+  }, []);
+
+  const filteredHospitals = hospitals.filter((hospital) =>
+    hospital.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <div>
-      <form onSubmit={handleSearch}>
+    <div className="container mx-auto p-4 md:p-8">
+      <div className="bg-white rounded-lg shadow-xl p-6 md:p-8 mb-8">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
+          Find a Hospital
+        </h1>
+        <p className="text-gray-600 mb-6 md:mb-8">
+          Search for hospitals by name.
+        </p>
         <input
           type="text"
-          placeholder="Search for hospitals..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search for a hospital..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full p-4 rounded-lg border-2 border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
         />
-        <button type="submit">Search</button>
-      </form>
-
-      <div>
-        {results.length > 0 ? (
-          results.map((hospital) => (
-            <div
-              key={hospital._id}
-              onClick={() => handleHospitalClick(hospital._id)}
-              className="hospital-card"
-            >
-              <h3>{hospital.name}</h3>
-              <p>{hospital.location}</p>
+      </div>
+      {loading && (
+        <div className="text-center text-lg font-medium text-gray-600">
+          Loading hospitals...
+        </div>
+      )}
+      {error && (
+        <div className="text-center text-lg font-medium text-red-600">
+          Error: {error}
+        </div>
+      )}
+      {!loading && filteredHospitals.length === 0 && (
+        <div className="text-center text-lg font-medium text-gray-500">
+          No hospitals found.
+        </div>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredHospitals.map((hospital) => (
+          <Link to={`/hospitals/${hospital._id}`} key={hospital._id} className="block transform transition-all duration-300 hover:scale-105">
+            <div className="bg-white rounded-lg shadow-md hover:shadow-xl p-6 border-l-4 border-blue-500">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                {hospital.name}
+              </h2>
+              <p className="text-gray-600 text-sm mb-4">
+                <span className="font-medium">Address:</span>{" "}
+                {hospital.address || "Not specified"}
+              </p>
             </div>
-          ))
-        ) : (
-          <p>No results found</p>
-        )}
+          </Link>
+        ))}
       </div>
     </div>
   );
 };
 
-export default HospitalSearch;
+export default Hospitals;

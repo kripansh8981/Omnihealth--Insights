@@ -12,7 +12,7 @@ const hospitalSchema = new mongoose.Schema({
   password: { type: String, required: true },
   address: { type: String, required: true },
   role: { type: String, default: 'hospital' },
-  // Expanded fields for a more complete profile
+  // These fields are now essential for your app to function correctly
   phone: { type: String },
   website: { type: String },
   image: { type: String },

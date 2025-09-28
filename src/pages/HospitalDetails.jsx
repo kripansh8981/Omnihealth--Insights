@@ -1,10 +1,9 @@
-// pages/HospitalDetails.jsx
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const HospitalDetails = () => {
-  const { hospitalName } = useParams();
+  const { hospitalId } = useParams();
   const navigate = useNavigate();
   const [hospital, setHospital] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,151 +12,128 @@ const HospitalDetails = () => {
   useEffect(() => {
     const fetchHospitalDetails = async () => {
       try {
-        const response = await axios.get(`/api/hospitals/${encodeURIComponent(hospitalName)}`);
+        const response = await axios.get(`http://localhost:5000/api/hospitals/${hospitalId}`);
         setHospital(response.data);
-        setLoading(false);
       } catch (err) {
-        console.error("Error fetching hospital details:", err);
-        setError('Error fetching hospital details');
+        setError('Failed to fetch hospital details. Please ensure the backend server is running and the ID is valid.');
+      } finally {
         setLoading(false);
       }
     };
+    if (hospitalId) {
+      fetchHospitalDetails();
+    } else {
+      setError('Hospital ID not found.');
+      setLoading(false);
+    }
+  }, [hospitalId]);
 
-    fetchHospitalDetails();
-  }, [hospitalName]);
-
-  const handleBookAppointment = () => {
-    navigate('/appointment', {
-      state: {
-        hospitalName: hospital.name,
-        doctors: hospital.doctors,
-      },
-    });
+  // Function to handle redirection to the AppointmentForm (passes only Hospital ID)
+  const handleBookAppointmentClick = () => {
+    // Navigates to a generalized booking page for this specific hospital
+    navigate(`/appointment/book/${hospitalId}`);
+  };
+  
+  // Function to handle redirection to Bed Availability
+  const handleCheckBedAvailabilityClick = () => {
+    navigate(`/bed-availability/${hospitalId}`);
   };
 
-  const handleViewAppointments = () => {
-    navigate(`/appointments/${encodeURIComponent(hospital.name)}`);
-  };
 
-  if (loading) return <div style={{ textAlign: 'center' }}>Loading hospital details...</div>;
-  if (error) return <div style={{ textAlign: 'center', color: 'red' }}>{error}</div>;
+  if (loading) {
+    return <div className="container mx-auto p-8 text-center text-gray-600">Loading hospital details...</div>;
+  }
+  if (error) {
+    return <div className="container mx-auto p-8 text-center text-red-600">Error: {error}</div>;
+  }
+  if (!hospital) {
+    return <div className="container mx-auto p-8 text-center text-gray-500">Hospital not found.</div>;
+  }
+
+  const defaultImage = 'https://placehold.co/600x300/a3b1c6/ffffff?text=Hospital+Image';
+  const hasDoctors = hospital.doctors && hospital.doctors.length > 0;
 
   return (
-    <div style={{
-      padding: '40px',
-      maxWidth: '1200px',
-      margin: '0 auto',
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: '40px',
-      alignItems: 'start',
-    }}>
-      {/* Left Column */}
-      <div>
-        <img 
-          src={hospital.image} 
-          alt={hospital.name} 
-          style={{ 
-            width: '100%', 
-            height: 'auto', 
-            maxHeight: '400px', 
-            objectFit: 'cover', 
-            borderRadius: '12px', 
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            marginBottom: '20px'
-          }}
-        />
-        <h2 style={{ fontSize: '2.2rem', marginBottom: '10px' }}>{hospital.name}</h2>
-        <p style={{ marginBottom: '8px' }}><strong>📍 Location:</strong> {hospital.location}</p>
-        <p style={{ marginBottom: '8px' }}>
-          <strong>🔬 Specializations:</strong> {hospital.specialization.join(', ')}
-        </p>
-      </div>
-
-      {/* Right Column */}
-      <div>
-        {/* Doctors Section */}
-        <div style={{ marginBottom: '30px' }}>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>👨‍⚕️ Doctors</h3>
-          <ul style={{ listStyleType: 'none', padding: 0 }}>
-            {hospital.doctors.map((doctor, index) => (
-              <li key={index} style={{ 
-                marginBottom: '15px', 
-                padding: '10px', 
-                backgroundColor: '#f9f9f9', 
-                borderRadius: '8px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-              }}>
-                <strong>{doctor.name}</strong> - {doctor.specialization} <br />
-                <small>🕒 Available: {doctor.availability.join(', ')}</small>
-              </li>
-            ))}
-          </ul>
+    <div className="container mx-auto p-4 md:p-8">
+      <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
+        
+        {/* Hospital Header Section */}
+        <div className="relative p-6 md:p-10 bg-blue-700 text-white shadow-lg">
+          <h1 className="text-4xl md:text-5xl font-extrabold">{hospital.name}</h1>
+          <p className="text-blue-200 mt-1">{hospital.address || "Location not specified"}</p>
         </div>
 
-        {/* Bed Availability Section */}
-        <div style={{ marginBottom: '40px' }}>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '10px' }}>🛏️ Bed Availability</h3>
-          <ul style={{ listStyleType: 'none', padding: 0 }}>
-            {hospital.bedAvailability.map((bed, index) => (
-              <li key={index} style={{ marginBottom: '8px' }}>
-                <strong>{bed.type}</strong>: {bed.availableBeds} / {bed.totalBeds} beds available
-              </li>
-            ))}
-          </ul>
-        </div>
+        <div className="p-6 md:p-10">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12 border-b pb-8">
+            
+            {/* Contact and Image Section */}
+            <div className="bg-gray-50 p-6 rounded-xl shadow-md col-span-1 flex flex-col justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">Profile & Contact</h2>
+                <img
+                  src={hospital.image || defaultImage}
+                  alt={`${hospital.name} cover`}
+                  className="w-full h-auto rounded-lg shadow-md mb-4"
+                  onError={(e) => { e.target.onerror = null; e.target.src = defaultImage; }}
+                />
+                <p className="text-gray-700 mb-3">
+                  <span className="font-semibold text-blue-600">Phone:</span> {hospital.phone || "Not specified"}
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-semibold text-blue-600">Email:</span> {hospital.email}
+                </p>
+              </div>
+            </div>
 
-        {/* Buttons Section */}
-        <div style={{ textAlign: 'center' }}>
-          <button 
-            onClick={handleBookAppointment} 
-            style={{
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              padding: '15px 30px',
-              fontSize: '18px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              marginRight: '20px',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-              transition: '0.3s ease',
-            }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#218838'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#28a745'}
-          >
-            💬 Book Appointment Now
-          </button>
-
-          <button 
-            onClick={handleViewAppointments}
-            style={{
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              padding: '15px 30px',
-              fontSize: '18px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-              transition: '0.3s ease',
-            }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#0056b3'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#007bff'}
-          >
-            📋 View Appointments
-          </button>
+            {/* Action Buttons Section */}
+            <div className="lg:col-span-2 space-y-6">
+              
+              {/* Appointment Booking Button */}
+              <div className="bg-green-50 p-6 rounded-xl shadow-md">
+                <h2 className="text-2xl font-bold text-green-800 mb-4">Doctor Appointment</h2>
+                <p className="text-gray-700 mb-4">Select a specialist and book your visit instantly.</p>
+                <button
+                  onClick={handleBookAppointmentClick}
+                  className="w-full py-3 px-4 font-bold rounded-lg text-white transition-colors duration-200 bg-green-600 hover:bg-green-700"
+                >
+                  Book Appointment
+                </button>
+              </div>
+              
+              {/* Bed Availability Button */}
+              <div className="bg-purple-50 p-6 rounded-xl shadow-md">
+                <h2 className="text-2xl font-bold text-purple-800 mb-4">Bed Availability</h2>
+                <p className="text-gray-700 mb-4">View real-time bed status before visiting the hospital.</p>
+                <button
+                  onClick={handleCheckBedAvailabilityClick}
+                  className="w-full py-3 px-4 font-bold rounded-lg text-white transition-colors duration-200 bg-purple-600 hover:bg-purple-700"
+                >
+                  Check Bed Availability
+                </button>
+              </div>
+              
+            </div>
+            
+          </div>
+          
+          {/* List of Doctors (Simple Listing) */}
+          <h3 className="text-3xl font-bold text-gray-800 mb-6">Our Specialists</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {hasDoctors ? (
+              hospital.doctors.map((doctor, index) => (
+                <div key={index} className="bg-gray-100 rounded-lg p-4 shadow-sm border border-gray-200">
+                  <h4 className="font-bold text-lg text-gray-900">Dr. {doctor.name}</h4>
+                  <p className="text-sm text-gray-600">{doctor.specialization}</p>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-4 text-center p-4 bg-gray-50 rounded-lg text-gray-500">No doctors have been added yet by the hospital management.</div>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 };
-
 export default HospitalDetails;
-
-
-
-
-
-
-

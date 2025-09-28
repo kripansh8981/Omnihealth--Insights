@@ -1,27 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const AppointmentForm = () => {
-  const location = useLocation();
+  const { hospitalId } = useParams();
   const navigate = useNavigate();
 
-  const { hospitalName, doctors } = location.state || {};
-
+  const [hospitalName, setHospitalName] = useState('');
+  const [doctors, setDoctors] = useState([]);
   const [patientName, setPatientName] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
   const [selectedDoctor, setSelectedDoctor] = useState('');
   const [email, setEmail] = useState('');
   const [confirmation, setConfirmation] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
+  // Fetch hospital and doctor data on page load
   useEffect(() => {
-    if (!hospitalName || !doctors) {
-      navigate('/');
-    }
-  }, [hospitalName, doctors, navigate]);
+    const fetchData = async () => {
+      if (!hospitalId) {
+        setErrorMessage('Hospital not found. Please select a hospital from the list.');
+        return;
+      }
+      
+      try {
+        const hospitalResponse = await axios.get(`http://localhost:5000/api/hospitals/${hospitalId}`);
+        setHospitalName(hospitalResponse.data.name);
+        
+        const doctorsResponse = await axios.get(`http://localhost:5000/api/appointment/doctors/${hospitalId}`);
+        setDoctors(doctorsResponse.data);
 
-  // Generate slots from 9:00 AM to 3:45 PM in 15-minute intervals
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setErrorMessage('Could not load hospital or doctor data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [hospitalId]);
+
   const generateSlots = () => {
     const slots = [];
     let hour = 9;
@@ -44,16 +65,19 @@ const AppointmentForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setErrorMessage('');
 
     if (!patientName || !age || !gender || !selectedDoctor || !email) {
-      alert("Please fill in all fields.");
+      setErrorMessage("Please fill in all fields.");
+      setLoading(false);
       return;
     }
-
+    
     const slotTime = generateSlots()[Math.floor(Math.random() * generateSlots().length)];
     const today = new Date();
-    today.setDate(today.getDate()+1);
-    const appointmentDate = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+    today.setDate(today.getDate() + 1);
+    const appointmentDate = today.toISOString().split('T')[0];
 
     try {
       const response = await axios.post('http://localhost:5000/api/appointment', {
@@ -62,144 +86,140 @@ const AppointmentForm = () => {
         patientName,
         age,
         gender,
-        email, // Send email to the backend
-        slotTime, 
+        email,
+        slotTime,
         appointmentDate
       });
-
       setConfirmation(response.data.appointment);
     } catch (error) {
       console.error('Failed to book appointment:', error.response?.data || error.message);
-      alert('Failed to book appointment');
+      setErrorMessage('Failed to book appointment');
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!hospitalName) {
+    return <div className="min-h-screen flex items-center justify-center text-red-600 font-bold">{errorMessage}</div>;
+  }
+
   return (
-    <div style={{
-      maxWidth: '600px',
-      margin: '40px auto',
-      padding: '30px',
-      border: '1px solid #ddd',
-      borderRadius: '12px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-      backgroundColor: '#ffffff',
-    }}>
-      <h2 style={{ marginBottom: '25px', textAlign: 'center' }}>
-        Book Appointment at <span style={{ color: '#007BFF' }}>{hospitalName}</span>
-      </h2>
-
-      {!confirmation ? (
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
-            <label><strong>Patient Name</strong></label><br />
-            <input
-              type="text"
-              value={patientName}
-              onChange={(e) => setPatientName(e.target.value)}
-              required
-              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}
-            />
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl bg-white rounded-lg shadow-xl p-8 md:p-12">
+        <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 text-center">
+          Book Appointment at <span className="text-blue-600">{hospitalName}</span>
+        </h2>
+        {errorMessage && (
+          <div className="mb-4 p-4 text-red-700 bg-red-100 rounded-lg text-center font-medium">
+            {errorMessage}
           </div>
+        )}
 
-          <div style={{ marginBottom: '20px' }}>
-            <label><strong>Age</strong></label><br />
-            <input
-              type="number"
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-              required
-              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label><strong>Gender</strong></label><br />
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              required
-              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}
+        {!confirmation ? (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Patient Name
+              </label>
+              <input
+                type="text"
+                value={patientName}
+                onChange={(e) => setPatientName(e.target.value)}
+                required
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Age
+              </label>
+              <input
+                type="number"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                required
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Gender
+              </label>
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                required
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              >
+                <option value="">Select</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Select Doctor
+              </label>
+              <select
+                value={selectedDoctor}
+                onChange={(e) => setSelectedDoctor(e.target.value)}
+                required
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              >
+                <option value="">Choose Doctor</option>
+                {doctors?.map((doc, index) => (
+                  <option key={index} value={doc.name}>
+                    {doc.name} — {doc.specialization}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 px-4 font-bold rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors duration-200 disabled:bg-gray-400"
             >
-              <option value="">Select</option>
-              <option>Male</option>
-              <option>Female</option>
-              <option>Other</option>
-            </select>
+              {loading ? 'Booking...' : 'Book Appointment'}
+            </button>
+          </form>
+        ) : (
+          <div className="bg-green-100 p-6 rounded-lg text-center">
+            <h3 className="text-2xl font-bold text-green-800 mb-2">✅ Appointment Confirmed!</h3>
+            <p className="text-green-700">Your appointment has been successfully booked.</p>
+            <div className="mt-4 text-left space-y-2">
+              <p><strong>Hospital:</strong> {confirmation.hospitalName}</p>
+              <p><strong>Doctor:</strong> {confirmation.doctorName}</p>
+              <p><strong>Patient:</strong> {confirmation.patientName}</p>
+              <p><strong>Age:</strong> {confirmation.age}</p>
+              <p><strong>Gender:</strong> {confirmation.gender}</p>
+              <p><strong>Email:</strong> {confirmation.email}</p>
+              <p><strong>Appointment Slot:</strong> {confirmation.slotTime}</p>
+            </div>
           </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label><strong>Email</strong></label><br />
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label><strong>Select Doctor</strong></label><br />
-            <select
-              value={selectedDoctor}
-              onChange={(e) => setSelectedDoctor(e.target.value)}
-              required
-              style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }}
-            >
-              <option value="">Choose Doctor</option>
-              {doctors?.map((doc, index) => (
-                <option key={index} value={doc.name}>
-                  {doc.name} — {doc.specialization}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            style={{
-              width: '100%',
-              padding: '12px',
-              backgroundColor: '#28a745',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '16px',
-              cursor: 'pointer',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#218838'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#28a745'}
-          >
-            Book Appointment
-          </button>
-        </form>
-      ) : (
-        <div style={{
-          backgroundColor: '#eaffea',
-          padding: '20px',
-          borderRadius: '10px',
-          textAlign: 'center',
-          marginTop: '20px'
-        }}>
-          <h3>✅ Appointment Confirmed!</h3>
-          <p><strong>Hospital:</strong> {confirmation.hospitalName}</p>
-          <p><strong>Doctor:</strong> {confirmation.doctorName}</p>
-          <p><strong>Patient:</strong> {confirmation.patientName}</p>
-          <p><strong>Age:</strong> {confirmation.age}</p>
-          <p><strong>Gender:</strong> {confirmation.gender}</p>
-          <p><strong>Email:</strong> {confirmation.email}</p>
-          <p><strong>Appointment Slot:</strong> {confirmation.slotTime}</p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
 
 export default AppointmentForm;
-
-
-
 
 
 
