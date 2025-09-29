@@ -2,27 +2,32 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const doctorSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  specialization: { type: String },
-  role: { type: String, default: "doctor" }
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  specialization: { type: String },
+  role: { type: String, default: "doctor" },
+  // CRITICAL: Stores the hospital this doctor is affiliated with (references Hospital model)
+  hospitalAffiliation: {
+    hospitalId: { type: mongoose.Schema.Types.ObjectId, ref: 'Hospital' },
+    hospitalName: { type: String }
+  }
 }, { timestamps: true });
 
 // Hash password before saving
 doctorSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  try {
-    const salt = await bcrypt.genSalt(10);
-   this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (err) {
-    next(err);
-  }
+  if (!this.isModified('password')) return next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 doctorSchema.methods.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('Doctor', doctorSchema);

@@ -13,41 +13,46 @@ const DoctorDashboard = () => {
 
   const token = localStorage.getItem('token');
 
-  // 1. Fetch User Data, Hospitals, and Appointments
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!token) {
-        navigate('/auth');
-        return;
-      }
-      try {
-        // Fetch User Profile
-        const userResponse = await axios.get('http://localhost:5000/api/protected/profile', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(userResponse.data.user);
+  // Helper function to fetch data and refresh the dashboard state
+  const fetchData = async (currentHospitalId = null) => {
+    if (!token) {
+      navigate('/auth');
+      return;
+    }
+    try {
+      // 1. Fetch User Profile (needed for name, specialization, and current hospital affiliation)
+      const userResponse = await axios.get('http://localhost:5000/api/protected/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(userResponse.data.user);
 
-        // Fetch Hospital List for Affiliation Form
-        const hospitalResponse = await axios.get('http://localhost:5000/api/hospitals');
-        setHospitals(hospitalResponse.data);
+      // 2. Fetch Hospital List for Affiliation Form
+      const hospitalResponse = await axios.get('http://localhost:5000/api/hospitals');
+      setHospitals(hospitalResponse.data);
 
-        // Fetch Appointments booked to this doctor
-        const appointmentResponse = await axios.get('http://localhost:5000/api/doctors/appointments', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setAppointments(appointmentResponse.data);
+      // 3. Fetch Appointments booked to this doctor
+      const appointmentResponse = await axios.get('http://localhost:5000/api/doctors/appointments', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAppointments(appointmentResponse.data);
 
-      } catch (err) {
-        console.error('Error fetching doctor data:', err);
-        setMessage('Failed to load dashboard data. Please log in again.');
+    } catch (err) {
+      console.error('Error fetching doctor data:', err);
+      // Only clear token if it's an unauthorized error (401)
+      if (err.response && err.response.status === 401) {
         localStorage.removeItem('token');
-      } finally {
-        setLoading(false);
+        navigate('/auth');
       }
-    };
+      setMessage('Failed to load dashboard components. Check server connection.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+
+  useEffect(() => {
     fetchData();
-  }, [navigate, token]);
+  }, [navigate, token]); // Re-run when token changes
 
   const handleAffiliationSubmit = async (e) => {
     e.preventDefault();
@@ -58,16 +63,23 @@ const DoctorDashboard = () => {
       return;
     }
 
+    // Check if doctor is already affiliated (based on fetched user state)
+    if (user.hospitalAffiliation && user.hospitalAffiliation.hospitalId) {
+        setMessage(`You are already affiliated with ${user.hospitalAffiliation.hospitalName}.`);
+        return;
+    }
+
     try {
       const response = await axios.post('http://localhost:5000/api/doctors/affiliate', {
         hospitalId: affiliateData.hospitalId,
-        name: user.name, // Doctor's name from their profile
-        specialization: user.specialization, // Doctor's specialization from their profile
       }, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       setMessage(response.data.message);
+      // CRITICAL FIX: Re-fetch all data to display the new affiliation status
+      await fetchData(); 
+
     } catch (err) {
       setMessage(err.response?.data?.message || 'Affiliation failed. Check if you are already affiliated.');
     }
@@ -87,6 +99,10 @@ const DoctorDashboard = () => {
     return <div className="p-8 text-center text-red-600">You must be logged in to view this page.</div>;
   }
 
+  // Determine current affiliation status for display
+  const isAffiliated = user.hospitalAffiliation && user.hospitalAffiliation.hospitalId;
+  const currentHospitalName = user.hospitalAffiliation?.hospitalName || 'None';
+
   return (
     <div className="container mx-auto p-4 md:p-8">
       <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">
@@ -105,29 +121,36 @@ const DoctorDashboard = () => {
       {/* Hospital Affiliation Section */}
       <div className="bg-white rounded-xl shadow-2xl p-6 md:p-8 mb-12">
         <h2 className="text-3xl font-bold text-gray-800 mb-4 border-b pb-2">Hospital Affiliation</h2>
-        <p className="text-gray-600 mb-6">Register your profile with a hospital to start accepting appointments.</p>
-        
-        <form onSubmit={handleAffiliationSubmit} className="flex flex-col md:flex-row gap-4">
-          <select 
-            value={affiliateData.hospitalId} 
-            onChange={(e) => setAffiliateData({ hospitalId: e.target.value })}
-            className="w-full md:w-2/3 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">-- Select Hospital --</option>
-            {hospitals.map((hospital) => (
-              <option key={hospital._id} value={hospital._id}>
-                {hospital.name} ({hospital.address})
-              </option>
-            ))}
-          </select>
-          <button 
-            type="submit"
-            className="w-full md:w-1/3 p-3 font-bold rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 disabled:bg-gray-400"
-            disabled={!affiliateData.hospitalId}
-          >
-            Affiliate Me
-          </button>
-        </form>
+        <p className={`text-lg mb-6 font-semibold ${isAffiliated ? 'text-green-600' : 'text-red-600'}`}>
+            Status: {isAffiliated ? `Affiliated with ${currentHospitalName}` : 'Not Affiliated'}
+        </p>
+
+        {!isAffiliated && (
+            <>
+                <p className="text-gray-600 mb-6">Register your profile with a hospital to start accepting appointments.</p>
+                <form onSubmit={handleAffiliationSubmit} className="flex flex-col md:flex-row gap-4">
+                  <select 
+                    value={affiliateData.hospitalId} 
+                    onChange={(e) => setAffiliateData({ hospitalId: e.target.value })}
+                    className="w-full md:w-2/3 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">-- Select Hospital --</option>
+                    {hospitals.map((hospital) => (
+                      <option key={hospital._id} value={hospital._id}>
+                        {hospital.name} ({hospital.address})
+                      </option>
+                    ))}
+                  </select>
+                  <button 
+                    type="submit"
+                    className="w-full md:w-1/3 p-3 font-bold rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 disabled:bg-gray-400"
+                    disabled={!affiliateData.hospitalId}
+                  >
+                    Affiliate Me
+                  </button>
+                </form>
+            </>
+        )}
       </div>
 
       {/* Upcoming Appointments Section */}

@@ -1,10 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const doctorSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  specialization: { type: String, required: true },
-});
+// Doctor sub-schema removed, as we will use references (ObjectIds)
+// const doctorSchema = new mongoose.Schema({ ... }); 
 
 const hospitalSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -12,14 +10,15 @@ const hospitalSchema = new mongoose.Schema({
   password: { type: String, required: true },
   address: { type: String, required: true },
   role: { type: String, default: 'hospital' },
-  // These fields are now essential for your app to function correctly
   phone: { type: String },
   website: { type: String },
   image: { type: String },
-  doctors: [doctorSchema], // Added a doctors array
+  
+  // CRITICAL FIX: Store references (ObjectIds) to the Doctor collection
+  doctors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Doctor' }], 
+
 }, { timestamps: true });
 
-// Hash password before saving
 hospitalSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   try {
